@@ -7,9 +7,9 @@ import { sendVerificationEmail } from "@/helpers/sendverificationEmail";
 export async function POST(request: Request){
   await dbConnect();
     try {  
-      const { Username, Email, Password } = await request.json();
+      const { username, email, password } = await request.json();
       const existingUserVerifiedByUsername = await UserModel.findOne({
-        Username,
+        username,
         isverified: true
       })
       if (existingUserVerifiedByUsername) {
@@ -37,11 +37,11 @@ export async function POST(request: Request){
             );
           }else{
             //Update existing unverified user with new details
-            const hashedPassword = await bcrypt.hash(Password, 10);
+            const hashedPassword = await bcrypt.hash(password, 10);
             const expiryDate = new Date();
             expiryDate.setHours(expiryDate.getHours() + 1);
-            existingUserVerifiedByEmail.Username = Username;
-            existingUserVerifiedByEmail.Password = hashedPassword;
+            existingUserVerifiedByEmail.username = username;
+            existingUserVerifiedByEmail.password = hashedPassword;
             existingUserVerifiedByEmail.verifyCode = verifyCode;
             existingUserVerifiedByEmail.verifyCodeExpire = new Date(Date.now() + 60 * 60 * 1000); // 1 hour from now
 
@@ -49,14 +49,14 @@ export async function POST(request: Request){
             await existingUserVerifiedByEmail.save();
           }
         }else{
-          const hashedPassword = await bcrypt.hash(Password, 10);
+          const hashedPassword = await bcrypt.hash(password, 10);
           const expiryDate = new Date();
           expiryDate.setHours(expiryDate.getHours() + 1);
 
           const newUser =new UserModel({
-                Username: Username,
-                Email: Email,
-                Password: hashedPassword,
+                username: username,
+                email: email,
+                password: hashedPassword,
                 verifyCode: verifyCode,
                 verifyCodeExpire: expiryDate,
                 isverified: false,
@@ -65,7 +65,7 @@ export async function POST(request: Request){
           })
           await newUser.save();
           //Send Verification Email
-          const emailResponse = await sendVerificationEmail(Username, Email, verifyCode);
+          const emailResponse = await sendVerificationEmail(username, email, verifyCode);
           if(!emailResponse.success){
             return Response.json({
               success: false,
