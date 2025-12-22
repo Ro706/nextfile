@@ -17,7 +17,8 @@ async function dbConnect(): Promise<void> {
     }
     catch(error){
         console.error('Error connecting to database:', error);
-        process.exit(1);    
+        // Gracefully fail instead of killing the process
+        throw new Error('Database connection failed');
     }
 }
 export default dbConnect;

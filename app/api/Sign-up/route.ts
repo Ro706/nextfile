@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const existingUserByEmail = await UserModel.findOne({ email });
 
     if (existingUserByEmail) {
-      if (existingUserByEmail.isverified) {
+      if (existingUserByEmail.isVerified) {
         return Response.json(
           { success: false, message: 'User already exists with this email' },
           { status: 400 }
@@ -48,7 +48,7 @@ export async function POST(request: Request) {
       // Update unverified user
       existingUserByEmail.password = await bcrypt.hash(password, 10);
       existingUserByEmail.verifyCode = verifyCode;
-      existingUserByEmail.verifyCodeExpire = verifyCodeExpiry;
+      existingUserByEmail.verifyCodeExpiry = verifyCodeExpiry;
 
       await existingUserByEmail.save();
     } else {

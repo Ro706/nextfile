@@ -16,18 +16,27 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials: any): Promise<any> {
                 await dbConnect();
                 try {
+                    console.log("Authorize called with:", { identifier: credentials.identifier, hasPassword: !!credentials.password });
+                    
                     const user = await UserModel.findOne({ 
                        $or: [
                         { email: credentials.identifier },
                         { username: credentials.identifier }
                        ] });
+                    
+                    console.log("User found:", user ? user.username : "No user found");
+
                     if (!user) {
                         throw new Error("User not found");
                     }
-                    if (!user.isverified) {
+                    if (!user.isVerified) {
+                        console.log("User not verified");
                         throw new Error("User is not verified");
                     }
                     const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+                    
+                    console.log("Password correct:", isPasswordCorrect);
+
                     if (isPasswordCorrect) {
                         return user;
                     }
@@ -35,6 +44,7 @@ export const authOptions: NextAuthOptions = {
                         throw new Error("Incorrect password");
                     }
                 } catch (error: any) {
+                    console.error("Authorize error:", error.message);
                     throw new Error(error);
                 }
             }
