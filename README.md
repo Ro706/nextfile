@@ -93,6 +93,48 @@ To run this project locally, make sure you have **Node.js (>=16)** installed.
 
 ---
 
+## 🔄 Project Flow
+
+```mermaid
+graph TD
+    subgraph Auth_Flow [Authentication Flow]
+        User((User)) -->|Sign Up| SignUpPage[Sign Up Page]
+        SignUpPage -->|Submit Details| ValidateSignUp{Valid Data?}
+        ValidateSignUp -- No --> SignUpPage
+        ValidateSignUp -- Yes --> CreateUser[Create Unverified User]
+        CreateUser -->|Send OTP Email| EmailService[Email Service]
+        EmailService -->|Receive Code| User
+        User -->|Enter Code| VerifyPage[Verify Account Page]
+        VerifyPage -->|Submit Code| ValidateCode{Valid Code?}
+        ValidateCode -- No --> VerifyPage
+        ValidateCode -- Yes --> UserVerified[User Verified]
+        UserVerified -->|Log In| SignInPage[Sign In Page]
+        SignInPage -->|Credentials| AuthCheck{Valid & Verified?}
+        AuthCheck -- No --> SignInPage
+        AuthCheck -- Yes --> Dashboard[User Dashboard]
+    end
+
+    subgraph Dashboard_Flow [Dashboard Features]
+        Dashboard -->|Toggle Switch| AcceptMsgs[Accept Messages: ON/OFF]
+        Dashboard -->|Fetch| MsgList[Message List]
+        Dashboard -->|Action| CopyLink[Copy Unique Link]
+        MsgList -->|Delete| DeleteMsg[Delete Message]
+    end
+
+    subgraph Public_Flow [Public Interaction]
+        PublicUser((Anonymous User)) -->|Visit Profile| PublicPage[Public Profile Page /u/username]
+        PublicPage -->|Request| AI[AI Message Suggestions]
+        AI -->|Select| InputMsg[Message Input]
+        PublicPage -->|Type| InputMsg
+        InputMsg -->|Send| CheckAccept{User Accepting?}
+        CheckAccept -- No --> ErrorSend[Error: Not Accepting]
+        CheckAccept -- Yes --> SaveDB[(Database)]
+        SaveDB -->|Update| MsgList
+    end
+```
+
+---
+
 ## 📌 Current Status
 
 | Area          | Status               |
